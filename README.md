@@ -1,6 +1,7 @@
 # ⚡ StockPulse — Real-Time Stock Intelligence Platform
 
 A complete production-ready SaaS platform for live stock news covering Indian (NSE/BSE) and International (NYSE/NASDAQ) markets.
+New update
 
 ---
 
