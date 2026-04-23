@@ -1,0 +1,6 @@
+{
+  "/page": "app/page.js",
+  "/dashboard/india/page": "app/dashboard/india/page.js",
+  "/dashboard/settings/page": "app/dashboard/settings/page.js",
+  "/dashboard/page": "app/dashboard/page.js"
+}

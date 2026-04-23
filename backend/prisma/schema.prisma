@@ -1,0 +1,181 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(uuid())
+  full_name     String
+  email         String   @unique
+  password_hash String?
+  phone         String?
+  country       String?
+  avatar_url    String?
+  role          String   @default("user")
+  verified      Boolean  @default(false)
+  verify_token  String?
+  reset_token   String?
+  reset_expires DateTime?
+  created_at    DateTime @default(now())
+  last_login    DateTime?
+
+  subscriptions  Subscription[]
+  payments       Payment[]
+  watchlists     Watchlist[]
+  alerts         Alert[]
+  saved_articles SavedArticle[]
+  reviews        Review[]
+  sessions       Session[]
+
+  @@map("users")
+}
+
+model Subscription {
+  id         String   @id @default(uuid())
+  user_id    String
+  plan       String   @default("free")
+  start_date DateTime @default(now())
+  end_date   DateTime?
+  status     String   @default("active")
+  payment_id String?
+  auto_renew Boolean  @default(true)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+model Payment {
+  id             String   @id @default(uuid())
+  user_id        String
+  amount         Float
+  currency       String   @default("INR")
+  method         String?
+  gateway        String
+  transaction_id String?
+  status         String   @default("pending")
+  invoice_url    String?
+  created_at     DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+model NewsArticle {
+  id           String   @id @default(uuid())
+  title        String
+  summary      String?
+  source_name  String
+  source_url   String?
+  article_url  String   @unique
+  stock_symbol String?
+  market       String?
+  sentiment    String?  @default("neutral")
+  sector       String?
+  published_at DateTime?
+  fetched_at   DateTime @default(now())
+
+  saved_by SavedArticle[]
+
+  @@map("news_articles")
+}
+
+model RssSource {
+  id     String  @id @default(uuid())
+  name   String
+  url    String  @unique
+  market String
+  active Boolean @default(true)
+
+  @@map("rss_sources")
+}
+
+model Stock {
+  id       String @id @default(uuid())
+  symbol   String @unique
+  name     String
+  market   String
+  sector   String?
+  exchange String?
+
+  @@map("stocks")
+}
+
+model Watchlist {
+  id           String   @id @default(uuid())
+  user_id      String
+  stock_symbol String
+  added_at     DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, stock_symbol])
+  @@map("watchlists")
+}
+
+model Alert {
+  id           String   @id @default(uuid())
+  user_id      String
+  stock_symbol String
+  active       Boolean  @default(true)
+  created_at   DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("alerts")
+}
+
+model SavedArticle {
+  id         String   @id @default(uuid())
+  user_id    String
+  article_id String
+  saved_at   DateTime @default(now())
+
+  user    User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  article NewsArticle @relation(fields: [article_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, article_id])
+  @@map("saved_articles")
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  user_id    String
+  rating     Int
+  comment    String
+  approved   Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("reviews")
+}
+
+model AdminLog {
+  id          String   @id @default(uuid())
+  admin_id    String
+  action      String
+  target_type String?
+  target_id   String?
+  timestamp   DateTime @default(now())
+
+  @@map("admin_logs")
+}
+
+model Session {
+  id            String   @id @default(uuid())
+  user_id       String
+  refresh_token String   @unique
+  device_info   String?
+  created_at    DateTime @default(now())
+  expires_at    DateTime
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
